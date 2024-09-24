@@ -1,0 +1,11 @@
+.python-version
+.idea/
+__pycache__/
+.DS_Store
+.venv/
+.coverage
+*.sqlite3
+pgdata/
+.env.*
+.env
+.secret.json

@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "django-1"
+version = "0.1.0"
+description = ""
+authors = ["moonyu <dbwls3681@naver.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+django = "^5.1.1"
+django-extensions = "^3.2.3"
+ipython = "^8.27.0"
+djangorestframework = "^3.15.2"
+pillow = "^10.4.0"
+setuptools = "^75.1.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
