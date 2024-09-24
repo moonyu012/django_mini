@@ -9,8 +9,11 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv('./.env')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -83,8 +86,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME','postgres'), # DB 이름
+        'USER':os.environ.get('DB_USER','postgres'), # DB 연결할 유저
+        'PASSWORD':os.environ.get('DB_PASSWORD','postgres'),# DB 접속 유저의 비밀번호
+        'HOST':os.environ.get('DB_HOST','localhost'), # DB 연결 시 사용한 호스트(ip 주소, localhost=127.0.0.1)
+        'PORT':os.environ.get('DB_PORT',5432), # DB 연결 시 사용할 PORT
     }
 }
 
