@@ -36,7 +36,7 @@ DJANGO_APPS = [
 
 # 추가 앱
 CUSTOM_APPS =[
-
+    'users',
 ]
 
 # 써드 파티 앱
