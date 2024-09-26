@@ -30,7 +30,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     email = models.EmailField(max_length=30, unique=True) # 이메일
     is_active = models.BooleanField(default=False) # 이메일 인증 여부에 따라 필드 수정하고 싶기 떄문에 초기 선언을 다시 해줌
-    phone = models.CharField(max_length=11, unique=True) # 전화번호
+    phone = models.CharField(max_length=13, unique=True) # 전화번호
     nickname = models.CharField(max_length=12) # 이름(닉네임)
     birthday = models.DateField(null=True, blank=True) # 생일
     gender = models.CharField(choices=GenderChoice) # 성별
