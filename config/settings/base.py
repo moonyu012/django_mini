@@ -40,6 +40,8 @@ DJANGO_APPS = [
 # 추가 앱
 CUSTOM_APPS =[
     'users',
+    'restaurants',
+    'reservations',
 ]
 
 # 써드 파티 앱
@@ -139,3 +141,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': 'rest_framework.permissions.',
 }
+
+AUTH_USER_MODEL = 'users.User'
