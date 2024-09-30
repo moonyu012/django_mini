@@ -1,15 +1,21 @@
+import requests
+
 from django.core import signing
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib.auth import login, get_user_model, logout
+from django.utils.http import urlencode
 
 from rest_framework import status
 from rest_framework.generics import CreateAPIView, get_object_or_404
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
-
+from django.shortcuts import redirect
 from users import serializers
+
+
 
 User = get_user_model()
 # generics : mixins -> CreateModelMixin : 검증해주는 기본 폼이 있는 메서드
@@ -64,3 +70,80 @@ class SessionLogoutAPIView(APIView):
         request.session.flush()
         logout(request)
         return Response({'message': 'logout successful.'}, status=status.HTTP_200_OK)
+
+
+class KakaoLoginView(APIView):
+    def get(self,request):
+        authorize_url = 'https://kauth.kakao.com/oauth/authorize'
+        query_params = {
+            'client_id': settings.KAKAO_CLIENT_ID,
+            'redirect_uri': settings.KAKAO_REDIRECT_URI,
+            'response_type': 'code',
+            'prompt': 'login', #
+        }
+        request_url = f"{authorize_url}?{urlencode(query_params)}"
+        return redirect(request_url)
+
+class KakaoCallbackView(APIView):
+    def get(self, request):
+        code = request.GET.get('code')
+        if not code:
+            return Response({'error': 'Code not provided'}, status=status.HTTP_400_BAD_REQUEST)
+
+        token_url = "https://kauth.kakao.com/oauth/token"
+        query_params = {
+            "grant_type": "authorization_code",
+            "client_id": settings.KAKAO_CLIENT_ID,
+            "redirect_uri": settings.KAKAO_REDIRECT_URI,
+            "client_secret": settings.KAKAO_CLIENT_SECRET,
+            "code": code,
+        }
+
+        token_response = requests.post(token_url, params=query_params)
+        if token_response.status_code != 200:
+            return Response({'error': 'Failed to obtain access token'}, status=status.HTTP_400_BAD_REQUEST)
+
+        token_data = token_response.json()
+        access_token = token_data.get('access_token')
+
+        profile_response = self.get_kakao_profile_response(access_token)
+        if profile_response.status_code != 200:
+            return Response({'error': 'Failed to obtain user profile'}, status=status.HTTP_400_BAD_REQUEST)
+
+        profile_data = profile_response.json()
+        kakao_account = profile_data.get('kakao_account')
+
+        email = kakao_account.get('email')
+        nickname = kakao_account.get('profile').get('nickname')
+
+        refresh_token, access_token = self.login_process(email=email, nickname=nickname)
+
+        return Response({
+            'refresh_token': refresh_token,
+            'access_token': access_token,
+            'email': email,
+            'nickname': nickname
+        },
+            status=status.HTTP_200_OK)
+
+    def get_kakao_profile_response(self, token):
+        profile_url = "https://kapi.kakao.com/v2/user/me"
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
+        }
+
+        profile_response = requests.get(profile_url, headers=headers)
+        return profile_response
+
+    def login_process(self,email, nickname):
+        user, created = User.objects.get_or_create(email=email)
+        if created:
+            user.is_active = True
+            user.set_unusable_password() # 비밀번호 난수로 만들어줌
+            user.save()
+
+        refresh_token = RefreshToken.for_user(user)
+        access_token = str(refresh_token.access_token)
+
+        return str(refresh_token), access_token
