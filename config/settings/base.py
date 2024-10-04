@@ -148,9 +148,9 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60), # 5분 마다 만료
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60), # 60분 마다 만료
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
-    "UPDATE_LAST_LOGIN": True,
+    "UPDATE_LAST_LOGIN": True, # 라스트 로그인 업데이트
 }
 
 KAKAO_CLIENT_ID = os.environ.get('KAKAO_CLIENT_ID', random.randint)

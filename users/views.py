@@ -84,10 +84,10 @@ class KakaoLoginView(APIView):
         request_url = f"{authorize_url}?{urlencode(query_params)}"
         return redirect(request_url)
 
-class KakaoCallbackView(APIView):
-    def get(self, request):
-        code = request.GET.get('code')
-        if not code:
+class KakaoCallbackView(APIView): # 카카오 서버측에서 서비스 서보쪽으로 인가코드 전달
+    def get(self, request): # get 메소드로 리다이렉트 요청 호출
+        code = request.GET.get('code') # get 메소드에 담겨있는 쿼리 파라미터 가져옴
+        if not code: # 코드 없으면 에러처리
             return Response({'error': 'Code not provided'}, status=status.HTTP_400_BAD_REQUEST)
 
         token_url = "https://kauth.kakao.com/oauth/token"
@@ -126,7 +126,7 @@ class KakaoCallbackView(APIView):
         },
             status=status.HTTP_200_OK)
 
-    def get_kakao_profile_response(self, token):
+    def get_kakao_profile_response(self, token): # access_token 으로 사용자 정보 얻어오는 부분
         profile_url = "https://kapi.kakao.com/v2/user/me"
         headers = {
             "Authorization": f"Bearer {token}",
@@ -140,6 +140,7 @@ class KakaoCallbackView(APIView):
         user, created = User.objects.get_or_create(email=email)
         if created:
             user.is_active = True
+            user.nickname = nickname
             user.set_unusable_password() # 비밀번호 난수로 만들어줌
             user.save()
 
