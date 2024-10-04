@@ -37,6 +37,8 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/users/', include('users.urls'),name='users'),
+    path('api/v1/restaurants/', include('restaurants.urls'),name='restaurants'),
+    path('api/v1/reservations/', include('reservations.urls'),name='reservations'),
 ]
 
 if settings.DEBUG: # 만약에 셋팅즈 디버그 트루이면 밑에 접속 허용
