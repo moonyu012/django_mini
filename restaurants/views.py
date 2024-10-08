@@ -1,5 +1,7 @@
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from restaurants.models import Restaurant
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, DestroyAPIView
+from rest_framework.permissions import IsAuthenticated
+
+from restaurants.models import Restaurant, Menu
 from restaurants import serializers
 from rest_framework import permissions
 
@@ -20,10 +22,19 @@ class IsOwner(permissions.BasePermission):
         return False  # AnonymousUser 이면 인증되지않은 유저이므로 무조건 False
 
 
+class IsRestaurantOwner(IsOwner):
+
+    def has_object_permission(self, request, view, obj):  # Put, Patch, Delete 요청 시 필요한 권한 점검
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return obj.restaurant.owner == request.user
+
+
 class RestaurantListCreateAPIView(ListCreateAPIView): # get 요청으로 식당 list 가져오고 create: post요청
     permission_classes = [permissions.IsAuthenticated, IsOwner] # 요청 보낸 사람이 로그인 되어 있는 유저인지먼저 확인
     serializer_class = serializers.RestaurantSerializer
     queryset = Restaurant.objects.all()
+
 
 
 
@@ -35,5 +46,15 @@ class RestaurantDetailAPIView(RetrieveUpdateDestroyAPIView):
     #
     # def get_object(self):
     #     return self.queryset.get(id=self.kwargs['restaurant_id'])
+
+
+class MenuCreateAPIView(CreateAPIView):
+    serializer_class = serializers.MenuSerializer
+    queryset = Menu.objects.all()
+    permission_classes = [IsAuthenticated,IsRestaurantOwner]
+
+class MenuDeleteAPIView(DestroyAPIView):
+    queryset = Menu.objects.all()
+    permission_classes = [IsAuthenticated,IsRestaurantOwner]
 
 
