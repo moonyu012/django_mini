@@ -47,3 +47,9 @@ class UserLoginSerializer(serializers.Serializer): # Serializer: 선언한 필�
 
         attrs['user'] = user # 임의로 유저라는 key에 user 반환
         return attrs # 뷰에서 사용 가능
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id','email','is_owner','phone','nickname']
+    
